@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   GoogleMap,
   useLoadScript,
@@ -9,14 +9,10 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from "use-places-autocomplete";
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopover,
-  ComboboxList,
-  ComboboxOption,
-  ComboboxButton
-} from "@reach/combobox";
+
+import { Button } from 'react-bootstrap';
+import Modal from './components/Modal';
+
 import { formatRelative } from "date-fns";
 
 import "@reach/combobox/styles.css";
@@ -71,7 +67,7 @@ export default function App() {
 
   return (
     <div>
-      <h1>
+      <h1 styles={{color: 'white'}}>
         Join Challenge
       </h1>
 
@@ -161,6 +157,8 @@ function Search({ panTo }) {
     },
   });
 
+  const [ modalShow, setModalShow ] = React.useState(false);
+
   // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
 
   const handleInput = (e) => {
@@ -182,23 +180,8 @@ function Search({ panTo }) {
 
   return (
     <div className="search">
-      <Combobox onSelect={handleSelect}>
-        {/* <ComboboxInput
-          value={value}
-          onChange={handleInput}
-          disabled={!ready}
-          placeholder="Search your location"
-        />
-        <ComboboxPopover>
-          <ComboboxList>
-            {status === "OK" &&
-              data.map(({ id, description }) => (
-                <ComboboxOption key={id} value={description} />
-              ))}
-          </ComboboxList>
-        </ComboboxPopover> */}
-        <ComboboxButton></ComboboxButton>
-      </Combobox>
+      <Modal show={modalShow} onHide={() => setModalShow(false)}/>
+      <Button onClick={() => setModalShow(true)} >Novo Alvo</Button>
     </div>
   );
 }

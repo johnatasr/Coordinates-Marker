@@ -1,8 +1,6 @@
 # Create your views here.
 from rest_framework import viewsets
 from django.core.exceptions import EmptyResultSet, RequestAborted
-from rest_framework.decorators import parser_classes
-from rest_framework.parsers import JSONParser
 from rest_framework.decorators import action
 from rest_framework.status import (
     HTTP_200_OK,
