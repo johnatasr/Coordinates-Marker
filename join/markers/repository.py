@@ -18,21 +18,23 @@ class MarkersRepository:
             return MarkerSerializer(marker, many=True).data
 
     def save_marker(self, marker_obj: object):
-        marker_created: object = self.marker.objects.create(
-            nome=marker_obj.nome,
-            latitude=marker_obj.latitude,
-            longitude=marker_obj.longitude,
-            expiracao=marker_obj.expiracao
-        )
-        if marker_created.exists():
-            return True
+        try:
+            self.marker.objects.create(
+                nome=marker_obj.nome,
+                latitude=marker_obj.latitude,
+                longitude=marker_obj.longitude,
+                expiracao=marker_obj.expiracao
+            )
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist
 
-    def update_marker(self, marker_obj: object):
-        marker: object = self.marker.objects.filter(id=marker_obj.id)
-        marker.upadate(**self.mount_dict_marker(marker_obj))
-        marker.save()
-
-        return True
+    def update_marker(self, marker_obj: object, id: int):
+        try:
+            params = self.mount_dict_marker(marker_obj)
+            marker: object = self.marker(id=id, **params)
+            marker.save()
+        except Exception as error:
+            raise Exception
 
     def mount_dict_marker(self, marker_obj: object):
         marker: dict = {
@@ -44,10 +46,12 @@ class MarkersRepository:
         return marker
 
     def delete_marker(self, id: int):
-        marker: object = self.marker.objects.filter(id=id)
-        marker.remove()
+        try:
+            marker: object = self.marker.objects.filter(id=id)
+            marker.delete()
+        except Exception as error:
+            raise error
 
-        return True
 
 
 
