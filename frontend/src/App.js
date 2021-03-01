@@ -13,10 +13,13 @@ import usePlacesAutocomplete, {
 import { Button } from 'react-bootstrap';
 import Modal from './components/Modal';
 
+import MarkerService from './services/MarkerService';
+
 import { formatRelative } from "date-fns";
 
 import "@reach/combobox/styles.css";
 import mapStyles from "./mapStyles";
+import { propTypes } from "react-bootstrap/esm/Image";
 
 const libraries = ["places"];
 const mapContainerStyle = {
@@ -33,6 +36,8 @@ const center = {
   lng: -79.3832,
 };
 
+const markerService = new MarkerService();
+
 export default function App() {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -41,16 +46,16 @@ export default function App() {
   const [markers, setMarkers] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
 
-  const onMapClick = React.useCallback((e) => {
-    setMarkers((current) => [
-      ...current,
-      {
-        lat: e.latLng.lat(),
-        lng: e.latLng.lng(),
-        time: new Date(),
-      },
-    ]);
-  }, []);
+  // const onMapClick = React.useCallback((e) => {
+  //   setMarkers((current) => [
+  //     ...current,
+  //     {
+  //       lat: e.latLng.lat(),
+  //       lng: e.latLng.lng(),
+  //       time: new Date(),
+  //     },
+  //   ]);
+  // }, []);
 
   const mapRef = React.useRef();
   const onMapLoad = React.useCallback((map) => {
@@ -62,6 +67,40 @@ export default function App() {
     mapRef.current.setZoom(14);
   }, []);
 
+  async function updateMarker(marker){
+    setSelected(marker)
+  }
+
+  React.useEffect(() => {
+    async function getMarkers() {
+        if (!isLoaded) {
+            try {
+                const response = await markerService.getMarkers();
+          
+                if (response) {
+                   response.data.forEach(element => {
+                    setMarkers((current) => [
+                      ...current,
+                      {
+                        latitude: element.latitude,
+                        longitude: element.longitude,
+                        nome: element.nome,
+                        id: element.id,
+                        expiracao: element.expiracao
+                      },
+                    ]);
+                   });
+                }      
+            }
+            catch (error) {
+                alert(error)
+            }
+        }     
+    }
+    getMarkers();
+}, [])
+
+
   if (loadError) return "Error";
   if (!isLoaded) return "Loading...";
 
@@ -72,7 +111,7 @@ export default function App() {
       </h1>
 
       <Locate panTo={panTo} />
-      <Search panTo={panTo} />
+      <Search panTo={panTo} markerData={selected}/>
 
       <GoogleMap
         id="map"
@@ -80,16 +119,14 @@ export default function App() {
         zoom={8}
         center={center}
         options={options}
-        onClick={onMapClick}
+        // onClick={onMapClick}
         onLoad={onMapLoad}
       >
         {markers.map((marker) => (
           <Marker
-            key={`${marker.lat}-${marker.lng}`}
-            position={{ lat: marker.lat, lng: marker.lng }}
-            onClick={() => {
-              setSelected(marker);
-            }}
+            key={`${marker.latitude}-${marker.longitude}`}
+            position={{ lat: marker.latitude, lng: marker.longitude }}
+            onClick={() => updateMarker(marker)}
             icon={{
               url: `/bear.svg`,
               origin: new window.google.maps.Point(0, 0),
@@ -108,7 +145,7 @@ export default function App() {
           >
             <div>
               <h2>
-                <span role="img" aria-label="bear">
+                <span role="img" aria-label="marcador">
                   🐻
                 </span>{" "}
                 Alert
@@ -143,7 +180,7 @@ function Locate({ panTo }) {
   );
 }
 
-function Search({ panTo }) {
+function Search({ panTo, markerData=null }) {
   const {
     ready,
     value,
@@ -169,6 +206,10 @@ function Search({ panTo }) {
     setValue(address, false);
     clearSuggestions();
 
+  if (markerData){
+    setModalShow(true);
+  }
+
     try {
       const results = await getGeocode({ address });
       const { lat, lng } = await getLatLng(results[0]);
@@ -178,10 +219,15 @@ function Search({ panTo }) {
     }
   };
 
+  function createMarker(){
+    setModalShow(true)
+    markerData = null;
+  }
+
   return (
     <div className="search">
-      <Modal show={modalShow} onHide={() => setModalShow(false)}/>
-      <Button onClick={() => setModalShow(true)} >Novo Alvo</Button>
+      <Modal show={modalShow} onHide={() => setModalShow(false)} markerData={markerData}/>
+      <Button onClick={() => createMarker()} >Novo Alvo</Button>
     </div>
   );
 }

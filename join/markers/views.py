@@ -41,8 +41,8 @@ class MarkerViewSet(viewsets.ModelViewSet):
         except Exception as error:
             return Response('Não foi possivel carregar o marcador', status=HTTP_500_INTERNAL_SERVER_ERROR)
 
-    @action(methods=['POST'], detail=False, url_path='save-marker', url_name='save_marker')
-    def save_marker(self, request):
+    @action(methods=['POST'], detail=False, url_path='create-marker', url_name='create_marker')
+    def create_marker(self, request):
         try:
             marker: object = create_marker_object(request)
             self.marker_repo.save_marker(marker)
