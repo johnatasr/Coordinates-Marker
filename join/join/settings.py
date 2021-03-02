@@ -25,7 +25,7 @@ SECRET_KEY = '9_xggj-1b3b%)=1zt*66g!*_8x-eb7@1r)u7#4akuz1^m6dy2)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -55,6 +55,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'join.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 TEMPLATES = [
     {
