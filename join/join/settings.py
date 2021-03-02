@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
-    'person',
     'markers'
 ]
 
@@ -87,7 +86,7 @@ DATABASES = {
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "postgres",
-        "HOST": "localhost",
+        "HOST": "db" if os.getenv("IN_DOCKER") else "localhost",
         "PORT": 5432,
     }
 }

@@ -1,2 +1,7 @@
 .idea
 frontend/node_modules
+frontend/.vscode
+node_modules
+join/.idea
+join/markers/__pycache__
+join/join/__pycache__

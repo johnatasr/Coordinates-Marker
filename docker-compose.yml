@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  db:
+    image: "postgres:alpine"
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    ports:
+      - "3000:80"
+
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: ./join
+    working_dir: /var/www/app/backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./join/:/var/www/app/backend
+      - ./frontend/:/var/www/app/frontend
+    environment:
+      IN_DOCKER: 1
+    depends_on:
+      - db
+

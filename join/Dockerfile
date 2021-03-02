@@ -24,8 +24,7 @@ USER user
 
 CMD ["sh","-c", \
     "sleep 4s && \
-     python manage.py makemigrations && \
-     python manage.py migrate && \
-     gunicorn cni.wsgi --log-file - -b 0.0.0.0:8000 --reload"]
+     python manage.py bootstrap && \
+     gunicorn join.wsgi --log-file - -b 0.0.0.0:8000 --reload"]
 
 

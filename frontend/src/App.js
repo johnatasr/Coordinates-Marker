@@ -192,7 +192,7 @@ function Search({ panTo }) {
   return (
     <div className="search">
       <Modal show={modalShow} onHide={() => closeModal()} markerData={null}/>
-      <Button onClick={() => createMarker()}>Novo Alvo</Button>
+      <Button style={{backgroundColor: '#33b7b4'}} onClick={() => createMarker()}>Novo Alvo</Button>
     </div>
   );
 }

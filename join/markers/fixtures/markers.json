@@ -1,0 +1,42 @@
+[
+{
+    "model": "markers.marker",
+    "pk": 1,
+    "fields": {
+        "nome": "Fortaleza",
+        "latitude": -3.732714,
+        "longitude":  -38.526997,
+        "expiracao": "2021-12-31"
+    }
+},
+{
+    "model": "markers.marker",
+    "pk": 2,
+    "fields": {
+        "nome": "Paris",
+        "latitude": 48.856613,
+        "longitude":  2.352222,
+        "expiracao": "2021-12-31"
+    }
+},
+{
+    "model": "markers.marker",
+    "pk": 3,
+    "fields": {
+        "nome": "São Paulo",
+        "latitude": -23.550520,
+        "longitude":  -46.633308,
+        "expiracao": "2021-12-31"
+    }
+},
+{
+    "model": "markers.marker",
+    "pk": 4,
+    "fields": {
+        "nome": "Nova York",
+        "latitude": 40.712776,
+        "longitude":  -74.005974,
+        "expiracao": "2021-12-31"
+    }
+}
+]
