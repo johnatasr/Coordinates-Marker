@@ -11,6 +11,7 @@ class MarkerService {
             const response = await this.api.get('get-markers')
             return response
         } catch(err) {
+            console.log(err)
             throw err
         }
     }
@@ -26,7 +27,7 @@ class MarkerService {
 
     async createMarker(data){
         try{
-            const response = await this.api.post('create-marker', {data: data})
+            const response = await this.api.post('create-marker', data)
             return response
         } catch(err) {
             throw err
@@ -35,7 +36,7 @@ class MarkerService {
 
     async updateMarker(data){
         try{
-            const response = await this.api.put(`update-marker/${data.id}`, {data: data})
+            const response = await this.api.put(`update-marker/${data.id}`, data)
             return response
         } catch(err) {
             throw err

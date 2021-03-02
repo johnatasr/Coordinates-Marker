@@ -1,15 +1,15 @@
 
-function ValidPayload(payload){
+export default function ValidPayload(payload){
     try{
-        for (let i = 0; i <= payload.length; i++){
-            if (payload[i] === '' || payload[i] === null){
-                throw Error
-            }
+        for (var key in payload) {
+            if (payload[key] === null && payload[key] == "")
+                return false;
         }
-        return true
+        return true;
 
     } catch(err) {
         console.log(err)
         return false
     }
 }
+

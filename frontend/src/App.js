@@ -3,7 +3,6 @@ import {
   GoogleMap,
   useLoadScript,
   Marker,
-  InfoWindow,
 } from "@react-google-maps/api";
 import usePlacesAutocomplete, {
   getGeocode,
@@ -15,11 +14,8 @@ import Modal from './components/Modal';
 
 import MarkerService from './services/MarkerService';
 
-import { formatRelative } from "date-fns";
-
 import "@reach/combobox/styles.css";
 import mapStyles from "./mapStyles";
-import { propTypes } from "react-bootstrap/esm/Image";
 
 const libraries = ["places"];
 const mapContainerStyle = {
@@ -32,8 +28,8 @@ const options = {
   zoomControl: true,
 };
 const center = {
-  lat: 43.6532,
-  lng: -79.3832,
+  lat: -3.71846,
+  lng: -38.541672,
 };
 
 const markerService = new MarkerService();
@@ -43,19 +39,9 @@ export default function App() {
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries,
   });
+  const [loadedData, setLoadedData] = React.useState(false);
   const [markers, setMarkers] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
-
-  // const onMapClick = React.useCallback((e) => {
-  //   setMarkers((current) => [
-  //     ...current,
-  //     {
-  //       lat: e.latLng.lat(),
-  //       lng: e.latLng.lng(),
-  //       time: new Date(),
-  //     },
-  //   ]);
-  // }, []);
 
   const mapRef = React.useRef();
   const onMapLoad = React.useCallback((map) => {
@@ -67,8 +53,11 @@ export default function App() {
     mapRef.current.setZoom(14);
   }, []);
 
-  async function updateMarker(marker){
-    setSelected(marker)
+  const [ modalShow, setModalShow ] = React.useState(false);
+
+  function updateMarker(markerObj){
+    setSelected(markerObj);
+    setModalShow(true);
   }
 
   React.useEffect(() => {
@@ -78,19 +67,9 @@ export default function App() {
                 const response = await markerService.getMarkers();
           
                 if (response) {
-                   response.data.forEach(element => {
-                    setMarkers((current) => [
-                      ...current,
-                      {
-                        latitude: element.latitude,
-                        longitude: element.longitude,
-                        nome: element.nome,
-                        id: element.id,
-                        expiracao: element.expiracao
-                      },
-                    ]);
-                   });
-                }      
+                   await setMarkers(response.data);
+                   setLoadedData(true);
+                }
             }
             catch (error) {
                 alert(error)
@@ -98,11 +77,11 @@ export default function App() {
         }     
     }
     getMarkers();
-}, [])
+  }, [markers])
 
 
   if (loadError) return "Error";
-  if (!isLoaded) return "Loading...";
+  if (!isLoaded) return "Carregando...";
 
   return (
     <div>
@@ -111,7 +90,7 @@ export default function App() {
       </h1>
 
       <Locate panTo={panTo} />
-      <Search panTo={panTo} markerData={selected}/>
+      <Search panTo={panTo} />
 
       <GoogleMap
         id="map"
@@ -122,38 +101,26 @@ export default function App() {
         // onClick={onMapClick}
         onLoad={onMapLoad}
       >
-        {markers.map((marker) => (
-          <Marker
-            key={`${marker.latitude}-${marker.longitude}`}
-            position={{ lat: marker.latitude, lng: marker.longitude }}
-            onClick={() => updateMarker(marker)}
-            icon={{
-              url: `/bear.svg`,
-              origin: new window.google.maps.Point(0, 0),
-              anchor: new window.google.maps.Point(15, 15),
-              scaledSize: new window.google.maps.Size(30, 30),
-            }}
-          />
-        ))}
+        { loadedData ?
+          markers.map((marker) => (
+            <Marker
+              key={`${marker.latitude}-${marker.longitude}`}
+              position={{ lat: parseFloat(marker.latitude), lng: parseFloat(marker.longitude) }}
+              onClick={() => updateMarker(marker)}
+              icon={{
+                url: `/marker.svg`,
+                origin: new window.google.maps.Point(0, 0),
+                anchor: new window.google.maps.Point(15, 15),
+                scaledSize: new window.google.maps.Size(30, 30),
+              }}
+            />
+          )) : null
+        }
 
         {selected ? (
-          <InfoWindow
-            position={{ lat: selected.lat, lng: selected.lng }}
-            onCloseClick={() => {
-              setSelected(null);
-            }}
-          >
-            <div>
-              <h2>
-                <span role="img" aria-label="marcador">
-                  🐻
-                </span>{" "}
-                Alert
-              </h2>
-              <p>Spotted {formatRelative(selected.time, new Date())}</p>
-            </div>
-          </InfoWindow>
+          <Modal show={modalShow} onHide={() => setModalShow(false)} markerData={selected}/>
         ) : null}
+
       </GoogleMap>
     </div>
   );
@@ -180,7 +147,7 @@ function Locate({ panTo }) {
   );
 }
 
-function Search({ panTo, markerData=null }) {
+function Search({ panTo }) {
   const {
     ready,
     value,
@@ -196,8 +163,6 @@ function Search({ panTo, markerData=null }) {
 
   const [ modalShow, setModalShow ] = React.useState(false);
 
-  // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
-
   const handleInput = (e) => {
     setValue(e.target.value);
   };
@@ -206,9 +171,6 @@ function Search({ panTo, markerData=null }) {
     setValue(address, false);
     clearSuggestions();
 
-  if (markerData){
-    setModalShow(true);
-  }
 
     try {
       const results = await getGeocode({ address });
@@ -221,13 +183,16 @@ function Search({ panTo, markerData=null }) {
 
   function createMarker(){
     setModalShow(true)
-    markerData = null;
+  }
+
+  function closeModal(){
+    setModalShow(false)
   }
 
   return (
     <div className="search">
-      <Modal show={modalShow} onHide={() => setModalShow(false)} markerData={markerData}/>
-      <Button onClick={() => createMarker()} >Novo Alvo</Button>
+      <Modal show={modalShow} onHide={() => closeModal()} markerData={null}/>
+      <Button onClick={() => createMarker()}>Novo Alvo</Button>
     </div>
   );
 }
